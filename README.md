@@ -89,6 +89,20 @@ http://127.0.0.1:8888/search?q=%s
    - **URL:** `http://127.0.0.1:8888/search?q=%s`
 
 ---
+## Switching Between Modes
+
+If you installed with **Manual mode (2)** and later want SearxNG to auto-start when you log in:
+
+```bash
+bash ~/Documents/searxng/setup-autostart.sh
+```
+
+### To disable auto-start again:
+
+```bash
+systemctl --user disable --now searxng.service
+```
+---
 
 ## Uninstall
 
