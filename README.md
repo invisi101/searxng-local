@@ -1,6 +1,6 @@
 # SearxNG Local — Private Search Engine Installer
 
-This project installs your own private instance of SearxNG entirely inside your user folder — no root system changes, no system-wide background services — auto-start (if chosen) runs only in your user session, and no logging.
+This project installs your own private instance of SearxNG entirely inside your user folder — no root system changes, no system-wide background services — auto-start (if chosen) runs only in your user session, and no logging. 
 
 Everything runs from:
 
@@ -11,8 +11,7 @@ It uses a Python virtual environment and can be completely removed with one comm
 ---
 
 ## Installation
-Run the following commands (do not include the ```bash lines):
-
+Run the following commands (do not include any (if they even appear) ```bash lines): 
 
 ### 1. Install prerequisites
 ```bash
@@ -33,6 +32,9 @@ You’ll be prompted:
 2) Manual mode (start/stop on demand)
 Choose [1/2]:
 ```
+
+> ✅ **Note:** The installer automatically adds `~/.local/bin` to your PATH if it’s missing,  
+> so you can run `searxng` from any terminal right away.
 
 ---
 
@@ -89,12 +91,13 @@ http://127.0.0.1:8888/search?q=%s
    - **URL:** `http://127.0.0.1:8888/search?q=%s`
 
 ---
+
 ## Switching Between Modes
 
 If you installed with **Manual mode (2)** and later want SearxNG to auto-start when you log in:
 
 ```bash
-bash ~/Documents/searxng/setup-autostart.sh
+bash ~/Documents/searxng-local/setup-autostart.sh
 ```
 
 ### To disable auto-start again:
@@ -102,6 +105,7 @@ bash ~/Documents/searxng/setup-autostart.sh
 ```bash
 systemctl --user disable --now searxng.service
 ```
+
 ---
 
 ## Uninstall
@@ -130,6 +134,6 @@ searxng start
 ```
 
 ---
+
 ### Credits
 This installer automates the deployment of [SearxNG](https://github.com/searxng/searxng), an open-source metasearch engine licensed under the GNU AGPLv3.
-
