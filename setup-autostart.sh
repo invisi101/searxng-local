@@ -4,10 +4,9 @@
 
 set -e
 
-SERVICE_FILE="$HOME/.config/systemd/user/searxng.service"
-
 echo "🔧 Setting up SearxNG auto-start ..."
 
+SERVICE_FILE="$HOME/.config/systemd/user/searxng.service"
 mkdir -p "$(dirname "$SERVICE_FILE")"
 
 cat > "$SERVICE_FILE" <<EOF
@@ -17,18 +16,20 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=$HOME/Documents/searxng/searxngEnvironment/bin/python $HOME/Documents/searxng/searxng/searx/webapp.py
-Restart=on-failure
+ExecStart=%h/Documents/searxng/venv/bin/python %h/Documents/searxng/searxng/searx/webapp.py
+WorkingDirectory=%h/Documents/searxng
+Restart=always
+RestartSec=5
+Environment=SEARXNG_SETTINGS_PATH=%h/Documents/searxng/settings.yml
 
 [Install]
 WantedBy=default.target
 EOF
 
 systemctl --user daemon-reload
-systemctl --user enable searxng.service
-systemctl --user start searxng.service
+systemctl --user enable --now searxng.service
 
+echo
 echo "✅ Auto-start enabled. SearxNG will launch automatically when you log in."
 echo "To disable auto-start, run:"
 echo "  systemctl --user disable --now searxng.service"
-
