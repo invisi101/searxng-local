@@ -11,8 +11,10 @@ CLI_BIN="$USER_BIN/searxng"
 SYSTEMD_UNIT="$HOME/.config/systemd/user/searxng.service"
 
 # ------------------------------------------------------------
-echo "SearxNG Local Installer"
-echo "-----------------------"
+echo "========================================"
+echo " SearxNG Local Installer"
+echo "========================================"
+echo
 echo "1) Full automatic mode (auto-start at login)"
 echo "2) Manual mode (start/stop on demand)"
 printf "Choose [1/2]: "
@@ -20,8 +22,8 @@ read -r MODE
 
 echo
 echo "[*] Checking prerequisites..."
-sudo apt update -y
-sudo apt install -y python3 python3-venv python3-pip git libnotify-bin xdg-utils
+sudo apt update -y >/dev/null
+sudo apt install -y python3 python3-venv python3-pip git libnotify-bin xdg-utils >/dev/null
 
 mkdir -p "$INSTALL_DIR"
 
@@ -45,8 +47,8 @@ source "$VENV_DIR/bin/activate"
 
 # Python deps
 echo "[*] Installing Python dependencies..."
-pip install -U pip setuptools wheel pyyaml msgspec redis httpx uvloop
-(cd "$REPO_DIR" && pip install --use-pep517 --no-build-isolation -e .)
+pip install -U pip setuptools wheel pyyaml msgspec redis httpx uvloop >/dev/null
+(cd "$REPO_DIR" && pip install --use-pep517 --no-build-isolation -e . >/dev/null)
 deactivate
 
 # ------------------------------------------------------------
@@ -149,6 +151,14 @@ EOF
 chmod +x "$CLI_BIN"
 
 # ------------------------------------------------------------
+# Add ~/.local/bin to PATH if missing
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+  export PATH="$HOME/.local/bin:$PATH"
+  echo "✅ Added ~/.local/bin to PATH"
+fi
+
+# ------------------------------------------------------------
 # Auto-start for mode 1
 if [ "$MODE" = "1" ]; then
   mkdir -p "$(dirname "$SYSTEMD_UNIT")"
@@ -181,10 +191,6 @@ fi
 
 # ------------------------------------------------------------
 # Post-install info
-if command -v firefox >/dev/null 2>&1; then
-  (nohup firefox "http://127.0.0.1:8888" >/dev/null 2>&1 || true) &
-fi
-
 echo
 echo "✅ Installation complete."
 echo
@@ -200,4 +206,7 @@ echo "  bash ~/Documents/searxng/sx-uninstall.sh"
 echo
 echo "To set as Firefox default search:"
 echo "  http://127.0.0.1:8888/search?q=%s"
-
+echo
+echo "----------------------------------------"
+echo " SearxNG Local setup finished"
+echo "----------------------------------------"
