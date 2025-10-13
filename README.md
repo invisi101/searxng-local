@@ -130,3 +130,6 @@ searxng start
 ```
 
 ---
+### Credits
+This installer automates the deployment of [SearxNG](https://github.com/searxng/searxng), an open-source metasearch engine licensed under the GNU AGPLv3.
+
