@@ -22,7 +22,7 @@ sudo apt install -y python3 python3-venv python3-pip git libnotify-bin xdg-utils
 ### 2. Clone and run the installer
 ```bash
 cd ~/Documents
-git clone https://github.com/YOURUSERNAME/searxng-local.git
+git clone https://github.com/invisi101/searxng-local.git
 cd searxng-local
 bash sx-deploy.sh
 ```
