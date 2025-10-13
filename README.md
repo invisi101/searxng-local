@@ -9,7 +9,8 @@ Everything runs from:
 It uses a Python virtual environment and can be completely removed with one command.
 
 ---
-
+## Only tested on Debian so far
+  
 ## Installation
 Run the following commands (do not include any (if they even appear) ```bash lines): 
 
@@ -82,13 +83,6 @@ http://127.0.0.1:8888/search?q=%s
 1. Open **Settings → Search → Add search engine**
 2. Use the above URL
 3. Name it “SearxNG Local”
-
-### Brave
-1. Go to **Settings → Search Engines → Manage Search Engines**
-2. Add a new engine with:  
-   - **Name:** SearxNG Local  
-   - **Keyword:** sx  
-   - **URL:** `http://127.0.0.1:8888/search?q=%s`
 
 ---
 
