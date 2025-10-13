@@ -1,41 +1,46 @@
 #!/usr/bin/env bash
-# sx-uninstall-mac.sh
-# Completely remove SearxNG Local from macOS (user install)
+# SearxNG macOS Uninstaller
+# Safely removes all local files, venv, and LaunchAgent.
 
-set -e
+set -euo pipefail
 
 APP_NAME="SearxNG"
 INSTALL_DIR="$HOME/Documents/searxng"
+USER_BIN="$HOME/.local/bin/searxng"
 LAUNCH_AGENT="$HOME/Library/LaunchAgents/local.searxng.plist"
-CLI_BIN="$HOME/.local/bin/searxng"
 
-echo "🧹 Uninstalling $APP_NAME ..."
+echo "🧹 Uninstalling $APP_NAME from macOS..."
+echo "----------------------------------------"
 
-# Stop if running
-if pgrep -f "searx/webapp.py" >/dev/null 2>&1; then
+# Stop running instance
+if pgrep -f "searx/webapp.py" >/dev/null; then
   echo "Stopping running instance..."
   pkill -f "searx/webapp.py" || true
+  sleep 1
 fi
 
-# Unload LaunchAgent if present
+# Unload LaunchAgent (if present)
 if [ -f "$LAUNCH_AGENT" ]; then
-  echo "Unloading LaunchAgent..."
+  echo "Removing LaunchAgent..."
   launchctl unload "$LAUNCH_AGENT" 2>/dev/null || true
   rm -f "$LAUNCH_AGENT"
 fi
 
-# Remove main folder
+# Remove user binary CLI
+if [ -f "$USER_BIN" ]; then
+  echo "Removing user CLI..."
+  rm -f "$USER_BIN"
+fi
+
+# Remove SearxNG files
 if [ -d "$INSTALL_DIR" ]; then
-  echo "Removing $INSTALL_DIR ..."
+  echo "Removing SearxNG files..."
   rm -rf "$INSTALL_DIR"
 fi
 
-# Remove CLI helper
-if [ -f "$CLI_BIN" ]; then
-  echo "Removing CLI command..."
-  rm -f "$CLI_BIN"
-fi
-
+echo "----------------------------------------"
+echo "✅ $APP_NAME has been completely removed."
 echo
-echo "✅ $APP_NAME completely uninstalled."
-echo "You can reinstall anytime using sx-deploy-mac.sh"
+echo "If you want to reinstall later, run:"
+echo "  bash ~/Documents/searxng-local/sx-deploy-mac.sh"
+echo "----------------------------------------"
