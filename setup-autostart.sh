@@ -17,9 +17,9 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=%h/Documents/searxng/venv/bin/python %h/Documents/searxng/searxng/searx/webapp.py
 WorkingDirectory=%h/Documents/searxng
-Restart=always
+ExecStart=%h/Documents/searxng/venv/bin/python %h/Documents/searxng/searxng/run.py
+Restart=on-failure
 RestartSec=5
 
 [Install]
