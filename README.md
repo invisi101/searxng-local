@@ -9,9 +9,10 @@ Everything runs from:
 It uses a Python virtual environment and can be completely removed with one command.
 
 ---
-## Tested on Debian, Ubunti, and Pop OS so far
+## Tested on Ubuntu, Debian and Pop OS so far. Won't work on Mac/Windows. 
+
 Previous instances of SearxNG or aliases in .bashrc or .zshrc can clash with this install.  
-It is recommended you firstly backup then remove all just SearxNG instances, folders, files before installing this.
+It is recommended you firstly backup then remove all such SearxNG instances, folders, files before installing this.
   
 ## Installation
 Run the following commands (do not include any (if they even appear) ```bash lines): 
