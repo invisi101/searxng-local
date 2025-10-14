@@ -18,7 +18,7 @@ Tested on:
 - Debian
 - Pop!_OS
 
-(Not yet supported on macOS or Windows.)
+(For the Mac OS version, please visit  [https://github.com/invisi101/searx-mac-local])
 
 Previous instances of SearxNG or aliases in .bashrc or .zshrc can clash with this install.  
 It is recommended you firstly backup then remove all such SearxNG instances, folders, and files before installing this.
