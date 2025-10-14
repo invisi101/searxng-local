@@ -9,7 +9,7 @@ VENV_DIR="$INSTALL_DIR/venv"
 PY_APP="$REPO_DIR/searx/webapp.py"
 CONFIG="$INSTALL_DIR/settings.yml"
 USER_BIN="$HOME/.local/bin"
-CLI_BIN="$USER_BIN/searxng-fedora"
+CLI_BIN="$USER_BIN/searxng"
 SYSTEMD_UNIT="$HOME/.config/systemd/user/searxng-fedora.service"
 
 # ------------------------------------------------------------
@@ -127,7 +127,7 @@ case "\${1:-}" in
   stop)  stop_all ;;
   restart) stop_all; sleep 1; systemctl --user start "\$UNIT" 2>/dev/null || bash "\$START" ;;
   status) status ;;
-  *) echo "Usage: searxng-fedora {start|stop|restart|status}" ;;
+  *) echo "Usage: searxng {start|stop|restart|status}" ;;
 esac
 EOF
 chmod +x "$CLI_BIN"
@@ -158,9 +158,10 @@ EOF
 
   echo "✅ Auto-start enabled (systemd-user)."
 else
-  echo "✅ Manual mode selected. Use 'searxng-fedora' to control it."
+  echo "✅ Manual mode selected. Use 'searxng' to control it."
 fi
 
+ 
 # ------------------------------------------------------------
 # Ensure ~/.local/bin is in PATH
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -182,10 +183,10 @@ cat <<'INFO'
 Access: http://127.0.0.1:8888
 
 Control:
-  searxng-fedora start    # start
-  searxng-fedora stop     # stop
-  searxng-fedora restart  # restart
-  searxng-fedora status   # status
+  searxng start    # start
+  searxng stop     # stop
+  searxng restart  # restart
+  searxng status   # status
 
 Uninstall:
   bash ~/Documents/searxng-local/sx-uninstall-fedora.sh
