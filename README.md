@@ -5,6 +5,8 @@ Anyone is welcome to take what's here and try to get it working.
 It was really useful for setting SearxNG up on friends' computers and I do plan to try to make a new working version at some point, but not sure when I'll have time. 
 Anyway, for what it's worth......
 
+The good news is that the instructions from SearxNG themselves are much clearer than what I remember before.  I installed it with no issues by following the instrux on their website at https://docs.searxng.org/admin/installation-searxng.html
+
 -------
 
 
