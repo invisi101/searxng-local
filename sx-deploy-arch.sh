@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sx-deploy.sh — Debian/Ubuntu installer for SearxNG Local
+# sx-deploy-arch.sh — Arch Linux installer for SearxNG Local
 set -euo pipefail
 
 APP_NAME="SearxNG"
@@ -13,8 +13,8 @@ CLI_BIN="$USER_BIN/searxng"
 SYSTEMD_UNIT="$HOME/.config/systemd/user/searxng.service"
 
 # ------------------------------------------------------------
-echo "$APP_NAME Local Installer (Debian/Ubuntu)"
-echo "------------------------------------------"
+echo "$APP_NAME Local Installer (Arch Linux)"
+echo "----------------------------------------"
 echo "1) Full automatic mode (auto-start at login)"
 echo "2) Manual mode (start/stop on demand)"
 printf "Choose [1/2]: "
@@ -22,12 +22,11 @@ read -r MODE
 
 echo
 echo "[*] Installing prerequisites..."
-sudo apt update -y
-sudo apt install -y \
-    python3 python3-venv python3-pip python3-dev \
-    git build-essential \
-    libxml2-dev libxslt-dev zlib1g-dev libffi-dev libssl-dev \
-    libnotify-bin xdg-utils
+sudo pacman -S --needed --noconfirm \
+    python python-pip \
+    git base-devel \
+    libxml2 libxslt libffi openssl \
+    libnotify xdg-utils
 
 mkdir -p "$INSTALL_DIR"
 
@@ -44,7 +43,7 @@ fi
 # ------------------------------------------------------------
 # Create venv
 echo "[*] Creating Python virtual environment..."
-python3 -m venv "$VENV_DIR"
+python -m venv "$VENV_DIR"
 
 echo "[*] Installing Python dependencies..."
 "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel pybind11
@@ -140,13 +139,9 @@ WantedBy=default.target
 EOF
 
   echo "[*] Enabling systemd-user service..."
-  if systemctl --user daemon-reload >/dev/null 2>&1; then
-    systemctl --user enable --now searxng.service >/dev/null 2>&1 && \
-      echo "Auto-start enabled (systemd-user)."
-  else
-    echo "[!] systemd-user not available; using nohup fallback."
-    bash "$INSTALL_DIR/start-searx.sh"
-  fi
+  systemctl --user daemon-reload
+  systemctl --user enable --now searxng.service
+  echo "Auto-start enabled (systemd-user)."
 else
   echo "Manual mode selected. Use 'searxng' to control it."
 fi
@@ -154,7 +149,13 @@ fi
 # ------------------------------------------------------------
 # Ensure ~/.local/bin is in PATH
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+  # Arch typically uses both .bashrc and .zshrc
+  if [ -f "$HOME/.bashrc" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+  fi
+  if [ -f "$HOME/.zshrc" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+  fi
   export PATH="$HOME/.local/bin:$PATH"
   echo "Added ~/.local/bin to PATH"
 fi
