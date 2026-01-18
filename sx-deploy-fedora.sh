@@ -3,27 +3,30 @@
 set -euo pipefail
 
 APP_NAME="SearxNG"
-INSTALL_DIR="$HOME/Documents/searxng-fedora"
+INSTALL_DIR="$HOME/Documents/searxng"
 REPO_DIR="$INSTALL_DIR/searxng"
 VENV_DIR="$INSTALL_DIR/venv"
 PY_APP="$REPO_DIR/searx/webapp.py"
 CONFIG="$INSTALL_DIR/settings.yml"
 USER_BIN="$HOME/.local/bin"
 CLI_BIN="$USER_BIN/searxng"
-SYSTEMD_UNIT="$HOME/.config/systemd/user/searxng-fedora.service"
+SYSTEMD_UNIT="$HOME/.config/systemd/user/searxng.service"
 
 # ------------------------------------------------------------
-echo "SearxNG Local Installer (Fedora)"
-echo "--------------------------------"
+echo "$APP_NAME Local Installer (Fedora)"
+echo "------------------------------------"
 echo "1) Full automatic mode (auto-start at login)"
 echo "2) Manual mode (start/stop on demand)"
 printf "Choose [1/2]: "
 read -r MODE
 
 echo
-
-echo "[*] Checking prerequisites with dnf..."
-sudo dnf install -y python3 python3-pip python3-virtualenv git libnotify xdg-utils || true
+echo "[*] Installing prerequisites..."
+sudo dnf install -y \
+    python3 python3-pip python3-devel \
+    git gcc \
+    libxml2-devel libxslt-devel libffi-devel openssl-devel \
+    libnotify xdg-utils
 
 mkdir -p "$INSTALL_DIR"
 
@@ -31,7 +34,7 @@ mkdir -p "$INSTALL_DIR"
 # Clone or update SearxNG
 if [ ! -d "$REPO_DIR/.git" ]; then
   echo "[*] Cloning SearxNG repository..."
-  git clone https://github.com/searxng/searxng "$REPO_DIR"
+  git clone --depth 1 https://github.com/searxng/searxng.git "$REPO_DIR"
 else
   echo "[*] Updating existing SearxNG repository..."
   (cd "$REPO_DIR" && git pull)
@@ -39,22 +42,20 @@ fi
 
 # ------------------------------------------------------------
 # Create venv
-if [ ! -d "$VENV_DIR" ]; then
-  echo "[*] Creating Python virtual environment..."
-  python3 -m venv "$VENV_DIR"
-fi
-source "$VENV_DIR/bin/activate"
+echo "[*] Creating Python virtual environment..."
+python3 -m venv "$VENV_DIR"
 
 echo "[*] Installing Python dependencies..."
-pip install -U pip setuptools wheel pyyaml msgspec redis httpx uvloop
-(cd "$REPO_DIR" && pip install --use-pep517 --no-build-isolation -e .)
-deactivate
+"$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel pybind11
+"$VENV_DIR/bin/pip" install lxml babel flask-babel pyyaml msgspec httpx uvloop
+"$VENV_DIR/bin/pip" install --use-pep517 --no-build-isolation -e "$REPO_DIR"
 
 # ------------------------------------------------------------
 # Config
 echo "[*] Configuring SearxNG..."
-cp "$REPO_DIR/searx/settings.yml" "$CONFIG"
-sed -i "s|ultrasecretkey|$(openssl rand -hex 32)|" "$CONFIG"
+cp "$REPO_DIR/utils/templates/etc/searxng/settings.yml" "$CONFIG"
+sed -i "s|secret_key:.*|secret_key: \"$(openssl rand -hex 16)\"|" "$CONFIG"
+
 cat >>"$CONFIG" <<'YAML'
 
 logging:
@@ -71,27 +72,11 @@ logging:
 YAML
 
 # ------------------------------------------------------------
-# Helper scripts
-cat >"$INSTALL_DIR/start-searx-fedora.sh"<<EOF
-#!/usr/bin/env bash
-source "$VENV_DIR/bin/activate"
-export SEARXNG_SETTINGS_PATH="$CONFIG"
-nohup python "$PY_APP" >/dev/null 2>&1 &
-disown
-echo "$APP_NAME started at http://127.0.0.1:8888"
-EOF
-chmod +x "$INSTALL_DIR/start-searx-fedora.sh"
-
-cat >"$INSTALL_DIR/stop-searx-fedora.sh"<<'EOF'
-#!/usr/bin/env bash
-if pgrep -f "searx/webapp.py" >/dev/null; then
-  pkill -f "searx/webapp.py"
-  echo "SearxNG stopped."
-else
-  echo "SearxNG is not running."
-fi
-EOF
-chmod +x "$INSTALL_DIR/stop-searx-fedora.sh"
+# Copy start/stop scripts to install directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cp "$SCRIPT_DIR/start-searx.sh" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/stop-searx.sh" "$INSTALL_DIR/"
+chmod +x "$INSTALL_DIR/start-searx.sh" "$INSTALL_DIR/stop-searx.sh"
 
 # ------------------------------------------------------------
 # CLI control tool
@@ -100,26 +85,26 @@ cat >"$CLI_BIN"<<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 BASE="$INSTALL_DIR"
-START="\$BASE/start-searx-fedora.sh"
-STOP="\$BASE/stop-searx-fedora.sh"
-UNIT="searxng-fedora.service"
+START="\$BASE/start-searx.sh"
+STOP="\$BASE/stop-searx.sh"
+UNIT="searxng.service"
 
 status() {
   if systemctl --user is-active --quiet "\$UNIT" 2>/dev/null; then
-    echo "🟢 Running (systemd)"
-  elif pgrep -f "\$BASE/searxng/searx/webapp.py" >/dev/null; then
-    echo "🟢 Running (manual)"
+    echo "Running (systemd)"
+  elif pgrep -f "searx/webapp.py" >/dev/null; then
+    echo "Running (manual)"
   else
-    echo "🔴 Not running"
+    echo "Not running"
   fi
 }
 
 stop_all() {
-  echo "🧹 Stopping all SearxNG instances..."
+  echo "Stopping all SearxNG instances..."
   systemctl --user stop "\$UNIT" 2>/dev/null || true
-  pkill -f "\$BASE/searxng/searx/webapp.py" 2>/dev/null || true
+  pkill -f "searx/webapp.py" 2>/dev/null || true
   sleep 1
-  echo "✅ All SearxNG processes stopped."
+  echo "All SearxNG processes stopped."
 }
 
 case "\${1:-}" in
@@ -138,7 +123,7 @@ if [ "$MODE" = "1" ]; then
   mkdir -p "$(dirname "$SYSTEMD_UNIT")"
   cat >"$SYSTEMD_UNIT"<<EOF
 [Unit]
-Description=SearxNG (Fedora user service)
+Description=SearxNG Local Search
 After=network.target
 
 [Service]
@@ -153,41 +138,36 @@ RestartSec=5
 WantedBy=default.target
 EOF
 
+  echo "[*] Enabling systemd-user service..."
   systemctl --user daemon-reload
-  systemctl --user enable --now searxng-fedora.service
-
-  echo "✅ Auto-start enabled (systemd-user)."
+  systemctl --user enable --now searxng.service
+  echo "Auto-start enabled (systemd-user)."
 else
-  echo "✅ Manual mode selected. Use 'searxng' to control it."
+  echo "Manual mode selected. Use 'searxng' to control it."
 fi
 
- 
 # ------------------------------------------------------------
 # Ensure ~/.local/bin is in PATH
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
   export PATH="$HOME/.local/bin:$PATH"
-  echo "✅ Added ~/.local/bin to PATH"
+  echo "Added ~/.local/bin to PATH"
 fi
 
 # ------------------------------------------------------------
-# Post-install info
-if command -v firefox >/dev/null 2>&1; then
-  (nohup firefox "http://127.0.0.1:8888" >/dev/null 2>&1 || true) &
-fi
-
 echo
-cat <<'INFO'
-✅ Installation complete.
-
-Access: http://127.0.0.1:8888
-
-Control:
-  searxng start    # start
-  searxng stop     # stop
-  searxng restart  # restart
-  searxng status   # status
-
-Uninstall:
-  bash ~/Documents/searxng-local/sx-uninstall-fedora.sh
-INFO
+echo "-------------------------------------------"
+echo "$APP_NAME installed successfully."
+echo
+echo "Location: $INSTALL_DIR"
+echo "Access:   http://127.0.0.1:8888"
+echo
+echo "Control:"
+echo "  searxng start    # start"
+echo "  searxng stop     # stop"
+echo "  searxng restart  # restart"
+echo "  searxng status   # status"
+echo
+echo "Uninstall:"
+echo "  bash ~/Documents/searxng-local/sx-uninstall.sh"
+echo "-------------------------------------------"

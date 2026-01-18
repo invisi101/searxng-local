@@ -1,6 +1,6 @@
 # SearxNG Local — Private Search Engine Installer
 
-This project installs your own private instance of SearxNG entirely inside your user folder — no root system changes, no system-wide background services — auto-start (if chosen) runs only in your user session, and no logging. 
+This project installs your own private instance of SearxNG entirely inside your user folder — no root system changes, no system-wide background services — auto-start (if chosen) runs only in your user session, and no logging.
 
 Everything runs from:
 
@@ -13,28 +13,23 @@ It uses a Python virtual environment and can be completely removed with one comm
 ## Compatibility
 
 Tested on:
+- Arch Linux / Manjaro / EndeavourOS
 - Fedora 42
 - Ubuntu
 - Debian
 - Pop!_OS
 
-(For the Mac OS version, please visit  [https://github.com/invisi101/searx-mac-local])
+(For the macOS version, please visit [searx-mac-local](https://github.com/invisi101/searx-mac-local))
 
-Previous instances of SearxNG or aliases in .bashrc or .zshrc can clash with this install.  
+Previous instances of SearxNG or aliases in .bashrc or .zshrc can clash with this install.
 It is recommended you firstly backup then remove all such SearxNG instances, folders, and files before installing this.
-  
+
 ---
 
 ## Installation
-Run the following commands (do not include any ```bash lines):
 
 ### Debian, Ubuntu, Pop!_OS
-#### 1. Install prerequisites
-```bash
-sudo apt install -y python3 python3-venv python3-pip git libnotify-bin xdg-utils
-```
 
-#### 2. Clone and run the installer
 ```bash
 cd ~/Documents
 git clone https://github.com/invisi101/searxng-local.git
@@ -43,12 +38,7 @@ bash sx-deploy.sh
 ```
 
 ### Fedora
-#### 1. Install prerequisites
-```bash
-sudo dnf install -y git
-```
 
-#### 2. Clone and run the installer
 ```bash
 cd ~/Documents
 git clone https://github.com/invisi101/searxng-local.git
@@ -56,14 +46,25 @@ cd searxng-local
 bash sx-deploy-fedora.sh
 ```
 
-You’ll be prompted:
+### Arch Linux / Manjaro / EndeavourOS
+
+```bash
+cd ~/Documents
+git clone https://github.com/invisi101/searxng-local.git
+cd searxng-local
+bash sx-deploy-arch.sh
+```
+
+---
+
+You'll be prompted:
 ```
 1) Full automatic mode (auto-start at login)
 2) Manual mode (start/stop on demand)
 Choose [1/2]:
 ```
 
-> ✅ **Note:** The installer automatically adds `~/.local/bin` to your PATH if it’s missing,  
+> The installer automatically adds `~/.local/bin` to your PATH if it's missing,
 > so you can run `searxng` from any terminal right away.
 
 ---
@@ -74,20 +75,9 @@ After installation, you can control your private SearxNG instance with these com
 ```bash
 searxng start
 searxng stop
+searxng restart
 searxng status
 ```
-
-or use the interactive menu:
-```bash
-searxng
-```
-
-That opens a simple menu where you can:
-- Start  
-- Stop  
-- Check status  
-- Open your browser  
-- Exit  
 
 Access your search engine at:
 ```
@@ -106,7 +96,7 @@ http://127.0.0.1:8888/search?q=%s
 ### Firefox
 1. Open **Settings → Search → Add search engine**
 2. Use the above URL
-3. Name it “SearxNG Local”
+3. Name it "SearxNG Local"
 
 ---
 
@@ -115,11 +105,7 @@ http://127.0.0.1:8888/search?q=%s
 If you installed with **Manual mode (2)** and later want SearxNG to auto-start when you log in:
 
 ```bash
-# Debian / Ubuntu / Pop!_OS
 bash ~/Documents/searxng-local/setup-autostart.sh
-
-# Fedora
-bash ~/Documents/searxng-local/setup-autostart-fedora.sh
 ```
 
 ### To disable auto-start again:
@@ -134,11 +120,7 @@ systemctl --user disable --now searxng.service
 
 To remove everything and stop the service:
 ```bash
-# Debian / Ubuntu / Pop!_OS
 bash ~/Documents/searxng-local/sx-uninstall.sh
-
-# Fedora
-bash ~/Documents/searxng-local/sx-uninstall-fedora.sh
 ```
 
 This completely deletes the `~/Documents/searxng` directory and all associated files.
@@ -155,8 +137,7 @@ git pull
 
 Then restart:
 ```bash
-searxng stop
-searxng start
+searxng restart
 ```
 
 ---
