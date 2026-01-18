@@ -1,15 +1,5 @@
 # SearxNG Local — Private Search Engine Installer
 
-SORRY.  THIS WAS WORKING PERFECTLY FOR A MONTH OR SO, ok no more caps, but some changes were made on the SearxNG side and the script no longer works.
-Anyone is welcome to take what's here and try to get it working.  
-It was really useful for setting SearxNG up on friends' computers and I do plan to try to make a new working version at some point, but not sure when I'll have time. 
-Anyway, for what it's worth......
-
-The good news is that the instructions from SearxNG themselves are much clearer than what I remember before.  I installed it with no issues by following the instrux on their website at https://docs.searxng.org/admin/installation-searxng.html
-
--------
-
-
 This project installs your own private instance of SearxNG entirely inside your user folder — no root system changes, no system-wide background services — auto-start (if chosen) runs only in your user session, and no logging. 
 
 Everything runs from:
