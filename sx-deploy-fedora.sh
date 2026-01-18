@@ -24,7 +24,7 @@ echo
 echo "[*] Installing prerequisites..."
 sudo dnf install -y \
     python3 python3-pip python3-devel \
-    git gcc \
+    git gcc gcc-c++ \
     libxml2-devel libxslt-devel libffi-devel openssl-devel \
     libnotify xdg-utils
 
