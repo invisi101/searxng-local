@@ -24,12 +24,13 @@ read -r MODE
 
 echo
 echo "[*] Checking prerequisites..."
-brew install -q python git || true
-python3 -m ensurepip --upgrade || true
+brew install -q git python@3.11 libxml2 libxslt openssl@3 libffi pybind11 || true
 
-echo "[*] Ensuring build dependencies..."
-brew install -q python-setuptools pybind11 || true
-python3 -m pip install --upgrade pip setuptools wheel pybind11 || true
+PYTHON_BIN="$(brew --prefix python@3.11)/bin/python3.11"
+
+# Set build flags so pip can find Homebrew libraries when compiling packages like lxml
+export LDFLAGS="-L$(brew --prefix libxml2)/lib -L$(brew --prefix libxslt)/lib -L$(brew --prefix openssl@3)/lib -L$(brew --prefix libffi)/lib"
+export CPPFLAGS="-I$(brew --prefix libxml2)/include -I$(brew --prefix libxslt)/include -I$(brew --prefix openssl@3)/include -I$(brew --prefix libffi)/include"
 
 mkdir -p "$INSTALL_DIR"
 
@@ -42,11 +43,34 @@ else
 fi
 
 echo "[*] Creating Python virtual environment..."
-python3 -m venv "$VENV_DIR"
+"$PYTHON_BIN" -m venv "$VENV_DIR"
 
 echo "[*] Installing Python dependencies..."
-"$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel
-"$VENV_DIR/bin/pip" install -e "$REPO_DIR"
+"$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel pybind11
+"$VENV_DIR/bin/pip" install lxml babel flask-babel pyyaml msgspec httpx uvloop
+"$VENV_DIR/bin/pip" install --use-pep517 --no-build-isolation -e "$REPO_DIR"
+
+# -------------------------
+# Configure settings
+# -------------------------
+echo "[*] Configuring SearxNG..."
+cp "$REPO_DIR/utils/templates/etc/searxng/settings.yml" "$CONFIG"
+sed -i '' "s|secret_key:.*|secret_key: \"$(openssl rand -hex 16)\"|" "$CONFIG"
+
+cat >>"$CONFIG" <<'YAML'
+
+logging:
+  version: 1
+  disable_existing_loggers: true
+  root:
+    level: CRITICAL
+    handlers: []
+  loggers:
+    searx:
+      level: CRITICAL
+      handlers: []
+      propagate: false
+YAML
 
 # -------------------------
 # Create start/stop scripts
@@ -56,6 +80,7 @@ cat > "$INSTALL_DIR/start-searx.sh" <<'EOF'
 set -e
 BASE="$HOME/Documents/searxng"
 source "$BASE/venv/bin/activate"
+export SEARXNG_SETTINGS_PATH="$BASE/settings.yml"
 python "$BASE/searxng/searx/webapp.py" > /dev/null 2>&1 &
 disown
 echo "✅ SearxNG started at http://127.0.0.1:8888"
@@ -123,6 +148,11 @@ if [ "$MODE" == "1" ]; then
     <string>$VENV_DIR/bin/python</string>
     <string>$PY_APP</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>SEARXNG_SETTINGS_PATH</key>
+    <string>$CONFIG</string>
+  </dict>
   <key>RunAtLoad</key><true/>
   <key>WorkingDirectory</key><string>$REPO_DIR</string>
   <key>StandardOutPath</key><string>$INSTALL_DIR/searxng.log</string>
