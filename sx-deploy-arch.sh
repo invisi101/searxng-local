@@ -47,8 +47,14 @@ python -m venv "$VENV_DIR"
 
 echo "[*] Installing Python dependencies..."
 "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel pybind11
-"$VENV_DIR/bin/pip" install lxml babel flask-babel pyyaml msgspec httpx uvloop
-"$VENV_DIR/bin/pip" install --use-pep517 --no-build-isolation -e "$REPO_DIR"
+
+# Install dependencies that setup.py needs during import
+echo "[*] Installing build-time dependencies..."
+"$VENV_DIR/bin/pip" install typing_extensions msgspec lxml babel flask-babel pyyaml httpx uvloop
+
+# Install SearxNG with --no-build-isolation to use our venv packages
+echo "[*] Installing SearxNG in editable mode..."
+"$VENV_DIR/bin/pip" install --no-build-isolation -e "$REPO_DIR"
 
 # ------------------------------------------------------------
 # Config
