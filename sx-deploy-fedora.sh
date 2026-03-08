@@ -47,7 +47,7 @@ python3 -m venv "$VENV_DIR"
 
 echo "[*] Installing Python dependencies..."
 "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel pybind11
-"$VENV_DIR/bin/pip" install lxml babel flask-babel pyyaml msgspec httpx uvloop
+"$VENV_DIR/bin/pip" install typing_extensions lxml babel flask-babel pyyaml msgspec httpx uvloop
 "$VENV_DIR/bin/pip" install --use-pep517 --no-build-isolation -e "$REPO_DIR"
 
 # ------------------------------------------------------------
