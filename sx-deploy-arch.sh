@@ -61,6 +61,7 @@ echo "[*] Installing SearxNG in editable mode..."
 echo "[*] Configuring SearxNG..."
 cp "$REPO_DIR/utils/templates/etc/searxng/settings.yml" "$CONFIG"
 sed -i "s|secret_key:.*|secret_key: \"$(openssl rand -hex 16)\"|" "$CONFIG"
+sed -i "s|limiter: true|limiter: false|" "$CONFIG"
 
 cat >>"$CONFIG" <<'YAML'
 
