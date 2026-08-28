@@ -135,6 +135,10 @@ cd ~/Documents/searxng/searxng
 git pull
 ```
 
+Re-running the installer is safe: it will not overwrite an existing
+`settings.yml`. Delete that file first if you want a clean default config
+regenerated.
+
 Then restart:
 ```bash
 searxng restart

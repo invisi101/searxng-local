@@ -59,11 +59,16 @@ echo "[*] Installing SearxNG in editable mode..."
 # ------------------------------------------------------------
 # Config
 echo "[*] Configuring SearxNG..."
-cp "$REPO_DIR/utils/templates/etc/searxng/settings.yml" "$CONFIG"
-sed -i "s|secret_key:.*|secret_key: \"$(openssl rand -hex 16)\"|" "$CONFIG"
-sed -i "s|limiter: true|limiter: false|" "$CONFIG"
+if [ -f "$CONFIG" ]; then
+  echo "    Existing settings.yml found - keeping your configuration."
+  echo "    To regenerate a default config, delete it and re-run this installer:"
+  echo "      rm $CONFIG"
+else
+  cp "$REPO_DIR/utils/templates/etc/searxng/settings.yml" "$CONFIG"
+  sed -i "s|secret_key:.*|secret_key: \"$(openssl rand -hex 16)\"|" "$CONFIG"
+  sed -i "s|limiter: true|limiter: false|" "$CONFIG"
 
-cat >>"$CONFIG" <<'YAML'
+  cat >>"$CONFIG" <<'YAML'
 
 logging:
   version: 1
@@ -77,6 +82,7 @@ logging:
       handlers: []
       propagate: false
 YAML
+fi
 
 # ------------------------------------------------------------
 # Copy start/stop scripts to install directory
